@@ -1,0 +1,9 @@
+{
+  "meeting_id": "example_meeting_001",
+  "title": "Example project sync",
+  "segments": [
+    {"speaker": "Speaker A", "start": 0.0, "end": 4.5, "text": "Welcome to the project sync. Today we will review the release plan.", "confidence": 0.96},
+    {"speaker": "Speaker B", "start": 4.5, "end": 9.0, "text": "The draft is ready and the remaining task is to verify the deployment checklist.", "confidence": 0.94},
+    {"speaker": "Speaker A", "start": 9.0, "end": 14.0, "text": "I will verify the checklist and share an update tomorrow.", "confidence": 0.97}
+  ]
+}

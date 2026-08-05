@@ -1,0 +1,11 @@
+{
+  "event": "transcript.done",
+  "data": {
+    "bot": {"id": "bot_example123", "metadata": {"source": "recall-meeting-assistant"}},
+    "recording": {"id": "recording_example456"},
+    "transcript": {
+      "id": "transcript_example789",
+      "status": {"code": "done", "created_at": "2026-06-01T10:30:00Z"}
+    }
+  }
+}

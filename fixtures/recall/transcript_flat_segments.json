@@ -1,0 +1,6 @@
+{
+  "transcript": [
+    {"speaker": "Speaker A", "start": 0.0, "end": 2.0, "text": "Let's lock the agenda.", "confidence": 0.94},
+    {"speaker": "Speaker B", "start": 2.5, "end": 5.0, "text": "Agreed, starting with integrations.", "confidence": 0.9}
+  ]
+}
