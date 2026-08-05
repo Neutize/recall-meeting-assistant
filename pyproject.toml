@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "recall-meeting-assistant"
+version = "0.2.0"
+description = "Installable Recall.ai meeting assistant for transcript capture and delivery."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "httpx>=0.27",
+  "PyYAML>=6.0",
+]
+
+[project.scripts]
+recall-meeting-assistant = "recall_meeting_assistant.cli:main"
+recall-meeting-create-bot = "recall_meeting_assistant.cli:create_bot_main"
+recall-meeting-status = "recall_meeting_assistant.cli:status_main"
+recall-meeting-webhook-receiver = "recall_meeting_assistant.receiver:main"
+recall-meeting-ingest = "recall_meeting_assistant.ingest_runner:main"
+recall-meeting-deliver-outbox = "recall_meeting_assistant.telegram:main"
+recall-meeting-deliver-outbox-fake = "recall_meeting_assistant.delivery:main"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "ruff>=0.8",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "SIM"]
+ignore = ["E501"]

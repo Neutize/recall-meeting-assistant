@@ -1,0 +1,42 @@
+[
+  {
+    "participant": {"id": 100, "name": "Speaker A", "is_host": true, "platform": "google_meet"},
+    "words": [
+      {"text": "Hi", "start_timestamp": {"relative": 0.5}, "end_timestamp": {"relative": 0.8}},
+      {"text": "everyone,", "start_timestamp": {"relative": 0.9}, "end_timestamp": {"relative": 1.4}},
+      {"text": "thanks", "start_timestamp": {"relative": 1.5}, "end_timestamp": {"relative": 1.9}},
+      {"text": "for", "start_timestamp": {"relative": 2.0}, "end_timestamp": {"relative": 2.1}},
+      {"text": "joining", "start_timestamp": {"relative": 2.2}, "end_timestamp": {"relative": 2.8}},
+      {"text": "the", "start_timestamp": {"relative": 2.9}, "end_timestamp": {"relative": 3.0}},
+      {"text": "project", "start_timestamp": {"relative": 3.1}, "end_timestamp": {"relative": 3.6}},
+      {"text": "sync.", "start_timestamp": {"relative": 4.0}, "end_timestamp": {"relative": 4.5}}
+    ]
+  },
+  {
+    "participant": {"id": 200, "name": "Speaker B", "is_host": false, "platform": "google_meet"},
+    "words": [
+      {"text": "Happy", "start_timestamp": {"relative": 5.0}, "end_timestamp": {"relative": 5.3}},
+      {"text": "to", "start_timestamp": {"relative": 5.4}, "end_timestamp": {"relative": 5.5}},
+      {"text": "be", "start_timestamp": {"relative": 5.6}, "end_timestamp": {"relative": 5.7}},
+      {"text": "here.", "start_timestamp": {"relative": 5.8}, "end_timestamp": {"relative": 6.2}},
+      {"text": "Let's", "start_timestamp": {"relative": 6.3}, "end_timestamp": {"relative": 6.6}},
+      {"text": "review", "start_timestamp": {"relative": 6.7}, "end_timestamp": {"relative": 7.1}},
+      {"text": "the", "start_timestamp": {"relative": 7.2}, "end_timestamp": {"relative": 7.3}},
+      {"text": "project", "start_timestamp": {"relative": 7.4}, "end_timestamp": {"relative": 7.9}},
+      {"text": "pipeline.", "start_timestamp": {"relative": 8.0}, "end_timestamp": {"relative": 8.6}}
+    ]
+  },
+  {
+    "participant": {"id": 100, "name": "Speaker A", "is_host": true, "platform": "google_meet"},
+    "words": [
+      {"text": "Sounds", "start_timestamp": {"relative": 9.0}, "end_timestamp": {"relative": 9.4}},
+      {"text": "good.", "start_timestamp": {"relative": 9.5}, "end_timestamp": {"relative": 9.9}},
+      {"text": "Speaker", "start_timestamp": {"relative": 10.0}, "end_timestamp": {"relative": 10.3}},
+      {"text": "B", "start_timestamp": {"relative": 10.4}, "end_timestamp": {"relative": 10.6}},
+      {"text": "will", "start_timestamp": {"relative": 10.7}, "end_timestamp": {"relative": 11.0}},
+      {"text": "send", "start_timestamp": {"relative": 11.1}, "end_timestamp": {"relative": 11.2}},
+      {"text": "the", "start_timestamp": {"relative": 11.3}, "end_timestamp": {"relative": 11.4}},
+      {"text": "recap.", "start_timestamp": {"relative": 11.5}, "end_timestamp": {"relative": 11.9}}
+    ]
+  }
+]

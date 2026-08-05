@@ -1,0 +1,20 @@
+[
+  {
+    "speaker": "Speaker A",
+    "speaker_id": 1,
+    "words": [
+      {"text": "Quick", "start_timestamp": 0.0, "end_timestamp": 0.4, "confidence": 0.98},
+      {"text": "status", "start_timestamp": 0.5, "end_timestamp": 0.9, "confidence": 0.97},
+      {"text": "update.", "start_timestamp": 1.0, "end_timestamp": 1.6, "confidence": 0.95}
+    ]
+  },
+  {
+    "speaker": "Speaker B",
+    "speaker_id": 2,
+    "words": [
+      {"text": "TVL", "start_timestamp": 2.0, "end_timestamp": 2.4, "confidence": 0.91},
+      {"text": "is", "start_timestamp": 2.5, "end_timestamp": 2.6, "confidence": 0.99},
+      {"text": "up.", "start_timestamp": 2.7, "end_timestamp": 3.0, "confidence": 0.96}
+    ]
+  }
+]

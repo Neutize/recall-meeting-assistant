@@ -1,0 +1,46 @@
+# Secrets and local config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.token
+mcp-tokens/
+participants.yaml
+*.sqlite
+*.sqlite3
+*.db
+
+# Runtime/private meeting data
+data/
+workspace/
+meeting_artifacts/
+recall_webhooks/
+recall_bot_runs/
+recall_ingest_smoke/
+*.mp4
+*.m4a
+*.mp3
+*.wav
+*.webm
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
