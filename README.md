@@ -31,7 +31,7 @@ HTTP service or delivery adapter.
 ## Installation
 
 ```bash
-git clone https://github.com/YOUR_ORGANIZATION/recall-meeting-assistant.git
+git clone https://github.com/Neutize/recall-meeting-assistant.git
 cd recall-meeting-assistant
 
 uv venv .venv
