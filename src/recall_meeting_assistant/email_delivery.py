@@ -46,7 +46,6 @@ GMAIL_BACKEND = "gmail"
 PENDING_STATUSES = {QUEUED_STATUS, FAILED_STATUS}
 GMAIL_SCOPES = [
     "https://www.googleapis.com/auth/gmail.send",
-    "https://www.googleapis.com/auth/gmail.modify",
 ]
 _BOLD_MARKDOWN_RE = re.compile(r"\*\*([^*\n][\s\S]*?[^*\n])\*\*")
 
