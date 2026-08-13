@@ -16,6 +16,7 @@ import json
 import logging
 import re
 import urllib.request
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
@@ -336,6 +337,7 @@ def process_recall_webhook(
     delivery_thread_id: str | None = None,
     meeting_left_text: str = DEFAULT_LEFT_MEETING_TEXT,
     participant_directory: ParticipantDirectory | None = None,
+    summary_recipient_emails: Iterable[str] | None = None,
 ) -> IngestResult:
     """Process a verified Recall webhook event into persisted transcript artifacts.
 
@@ -492,6 +494,7 @@ def process_recall_webhook(
         chat_id=delivery_chat_id,
         thread_id=delivery_thread_id,
         backend=delivery_backend,
+        summary_recipient_emails=summary_recipient_emails,
     )
     if summary_result.available:
         artifact_paths.update(summary_result.artifact_paths)

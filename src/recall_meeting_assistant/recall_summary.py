@@ -9,18 +9,26 @@ queues nothing rather than fabricating notes with another model.
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any, Mapping
 
-from recall_meeting_assistant.outbox import queue_summary_notification
+from recall_meeting_assistant.email_delivery import summary_markdown_to_email_html
+from recall_meeting_assistant.outbox import (
+    queue_summary_email_notification,
+    queue_summary_notification,
+)
 from recall_meeting_assistant.participants import ParticipantDirectory, format_action_owner
 from recall_meeting_assistant.storage import MeetingNotes, MeetingStore
+from recall_meeting_assistant.summary_recipients import summary_recipient_emails_from_bot
 
 RECALL_SUMMARY_PROVIDER = "recall_ai"
 RECALL_SUMMARY_MODEL = "recall_native_summary"
 RECALL_SUMMARY_JSON = "recall_summary.json"
 SUMMARY_MARKDOWN = "summary.md"
 OUTBOX_SUMMARY_KEY = "outbox_summary_json"
+OUTBOX_SUMMARY_EMAIL_KEY = "outbox_summary_email_json"
+SUMMARY_EMAIL_RECIPIENTS_JSON = "summary_email_recipients.json"
 
 _SUMMARY_KEYS = (
     "summary",
@@ -318,11 +326,12 @@ def ingest_recall_summary(
     chat_id: str | None = None,
     thread_id: str | None = None,
     backend: str = "telegram",
+    summary_recipient_emails: Iterable[str] | None = None,
 ) -> RecallSummaryIngestResult:
     """Persist Recall-native summary artifacts and queue a summary outbox message.
 
     If Recall does not provide a summary/analysis payload, the function is a safe
-    no-op: no notes, no fake summary, no Telegram outbox.
+    no-op: no notes, no fake summary, and no delivery outboxes.
     """
 
     summary = extract_recall_summary(resource, bot_payload)
@@ -345,15 +354,36 @@ def ingest_recall_summary(
         chat_id=chat_id,
         thread_id=thread_id,
     )
+    email_recipients = summary_recipient_emails_from_bot(
+        bot_payload,
+        explicit=summary_recipient_emails,
+    )
+    if email_recipients:
+        artifact_paths["summary_email_recipients_json"] = _write_json(
+            store,
+            meeting_id,
+            SUMMARY_EMAIL_RECIPIENTS_JSON,
+            {"recipients": email_recipients},
+        )
+        artifact_paths[OUTBOX_SUMMARY_EMAIL_KEY] = queue_summary_email_notification(
+            store,
+            meeting_id=meeting_id,
+            text=message,
+            recipients=email_recipients,
+            subject=f"Meeting summary: {summary.title or meeting_id}",
+            html_body=summary_markdown_to_email_html(message),
+        )
     return RecallSummaryIngestResult(True, meeting_id, artifact_paths, reason="summary_ingested")
 
 
 __all__ = [
     "OUTBOX_SUMMARY_KEY",
+    "OUTBOX_SUMMARY_EMAIL_KEY",
     "RECALL_SUMMARY_JSON",
     "RECALL_SUMMARY_MODEL",
     "RECALL_SUMMARY_PROVIDER",
     "SUMMARY_MARKDOWN",
+    "SUMMARY_EMAIL_RECIPIENTS_JSON",
     "RecallNativeSummary",
     "RecallSummaryIngestResult",
     "build_summary_message",

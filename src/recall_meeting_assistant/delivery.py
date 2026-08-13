@@ -57,6 +57,9 @@ class OutboxPayload:
     backend: str = "telegram"
     chat_id: str | None = None
     thread_id: str | None = None
+    recipients: list[str] = field(default_factory=list)
+    subject: str | None = None
+    html_body: str | None = None
     attachments: list[str] = field(default_factory=list)
     status: str = QUEUED_STATUS
     attempts: int = 0
@@ -82,6 +85,9 @@ class OutboxPayload:
             backend=str(data.get("backend") or "telegram"),
             chat_id=_clean_optional(data.get("chat_id")),
             thread_id=_clean_optional(data.get("thread_id")),
+            recipients=[str(item).strip() for item in (data.get("recipients") or []) if str(item).strip()],
+            subject=_clean_optional(data.get("subject")),
+            html_body=_clean_optional(data.get("html_body")),
             attachments=attachments,
             status=str(data.get("status") or QUEUED_STATUS),
             attempts=int(data.get("attempts") or 0),

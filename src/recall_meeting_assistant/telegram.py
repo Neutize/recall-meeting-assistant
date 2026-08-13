@@ -28,6 +28,7 @@ DEFAULT_STORAGE_DIR = str(get_product_home() / "meetings")
 DEFAULT_BACKEND = "telegram"
 TELEGRAM_TEXT_LIMIT = 4096
 PENDING_STATUSES = {QUEUED_STATUS, FAILED_STATUS}
+TELEGRAM_BACKENDS = frozenset({"telegram", "hermes_bot"})
 _BOLD_MARKDOWN_RE = re.compile(r"\*\*([^*\n][\s\S]*?[^*\n])\*\*")
 
 
@@ -180,7 +181,7 @@ def iter_pending(root: str | Path) -> list[OutboxPayload]:
             payload = OutboxPayload.from_file(path)
         except (ValueError, json.JSONDecodeError):
             continue
-        if payload.status in PENDING_STATUSES:
+        if payload.status in PENDING_STATUSES and payload.backend in TELEGRAM_BACKENDS:
             pending.append(payload)
     return pending
 
@@ -301,6 +302,7 @@ __all__ = [
     "DELIVERED_STATUS",
     "FAILED_STATUS",
     "QUEUED_STATUS",
+    "TELEGRAM_BACKENDS",
     "OutboxPayload",
     "iter_pending",
     "make_telegram_sender",
