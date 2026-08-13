@@ -20,6 +20,7 @@ recall-meeting-status = "recall_meeting_assistant.cli:status_main"
 recall-meeting-webhook-receiver = "recall_meeting_assistant.receiver:main"
 recall-meeting-ingest = "recall_meeting_assistant.ingest_runner:main"
 recall-meeting-deliver-outbox = "recall_meeting_assistant.telegram:main"
+recall-meeting-deliver-email = "recall_meeting_assistant.email_delivery:main"
 recall-meeting-deliver-outbox-fake = "recall_meeting_assistant.delivery:main"
 
 [project.optional-dependencies]
