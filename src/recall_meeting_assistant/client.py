@@ -19,6 +19,7 @@ bot endpoint is ``POST /api/v1/bot/``.
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Mapping
@@ -101,6 +102,15 @@ def region_base_url(region: str | None) -> str:
     return f"https://{normalized}.recall.ai"
 
 
+def _stringify_metadata_value(value: Any) -> str:
+    """Convert a metadata value to the string type required by Recall."""
+    if isinstance(value, str):
+        return value
+    if value is None or isinstance(value, (bool, int, float, list, tuple, dict)):
+        return json.dumps(value, separators=(",", ":"), sort_keys=True, default=str)
+    return str(value)
+
+
 def build_create_bot_payload(
     meeting_url: str,
     *,
@@ -117,9 +127,11 @@ def build_create_bot_payload(
     if not str(meeting_url or "").strip():
         raise ValueError("meeting_url is required to create a Recall bot.")
 
-    merged_metadata: dict[str, Any] = {"source": "recall-meeting-assistant"}
+    merged_metadata: dict[str, str] = {"source": "recall-meeting-assistant"}
     if metadata:
-        merged_metadata.update(metadata)
+        merged_metadata.update(
+            {str(key): _stringify_metadata_value(value) for key, value in metadata.items()}
+        )
 
     return {
         "meeting_url": meeting_url,

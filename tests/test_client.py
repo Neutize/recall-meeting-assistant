@@ -199,6 +199,25 @@ def test_build_create_bot_payload_standalone():
     ] == "prioritize_low_latency"
 
 
+def test_create_bot_serializes_non_string_metadata_values():
+    payload = build_create_bot_payload(
+        MEETING_URL,
+        metadata={
+            "summary_recipient_emails": ["redacted@example.invalid", "redacted@example.invalid"],
+            "enabled": True,
+            "attempt": 2,
+        },
+    )
+
+    assert payload["metadata"] == {
+        "source": "recall-meeting-assistant",
+        "summary_recipient_emails": '["redacted@example.invalid","redacted@example.invalid"]',
+        "enabled": "true",
+        "attempt": "2",
+    }
+    assert all(isinstance(value, str) for value in payload["metadata"].values())
+
+
 def test_build_create_bot_payload_requires_meeting_url():
     with pytest.raises(ValueError):
         build_create_bot_payload("   ")

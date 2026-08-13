@@ -15,6 +15,7 @@ OUTBOX_DIR = "outbox"
 LEFT_MEETING_OUTBOX_FILENAME = "meeting_left_notification.json"
 TRANSCRIPT_OUTBOX_FILENAME = "meeting_transcript_notification.json"
 SUMMARY_OUTBOX_FILENAME = "meeting_summary_notification.json"
+SUMMARY_EMAIL_OUTBOX_FILENAME = "meeting_summary_email_notification.json"
 
 
 def _utcnow_iso() -> str:
@@ -31,6 +32,9 @@ class OutboxMessage:
     backend: str = "telegram"
     chat_id: str | None = None
     thread_id: str | None = None
+    recipients: list[str] = field(default_factory=list)
+    subject: str | None = None
+    html_body: str | None = None
     attachments: list[str] = field(default_factory=list)
     created_at: str = field(default_factory=_utcnow_iso)
     status: Literal["queued"] = "queued"
@@ -40,13 +44,15 @@ class OutboxMessage:
             raise ValueError("OutboxMessage.meeting_id is required.")
         if not str(self.text).strip():
             raise ValueError("OutboxMessage.text is required.")
+        if any(not str(recipient).strip() for recipient in self.recipients):
+            raise ValueError("OutboxMessage recipients must not contain blank values.")
         for attachment in self.attachments:
             path = Path(str(attachment))
             if path.is_absolute() or ".." in path.parts:
                 raise ValueError("OutboxMessage attachments must be relative artifact paths.")
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload: dict[str, Any] = {
             "meeting_id": self.meeting_id,
             "kind": self.kind,
             "text": self.text,
@@ -57,6 +63,13 @@ class OutboxMessage:
             "created_at": self.created_at,
             "status": self.status,
         }
+        if self.recipients:
+            payload["recipients"] = list(self.recipients)
+        if self.subject is not None:
+            payload["subject"] = self.subject
+        if self.html_body is not None:
+            payload["html_body"] = self.html_body
+        return payload
 
 
 def write_outbox_message(
@@ -149,15 +162,46 @@ def queue_summary_notification(
     )
 
 
+def queue_summary_email_notification(
+    store: MeetingStore,
+    *,
+    meeting_id: str,
+    text: str,
+    recipients: list[str],
+    subject: str,
+    html_body: str | None = None,
+    backend: str = "gmail",
+) -> str:
+    """Queue a summary email for an already filtered recipient list."""
+
+    if not recipients:
+        raise ValueError("At least one summary email recipient is required.")
+    return write_outbox_message(
+        store,
+        OutboxMessage(
+            meeting_id=meeting_id,
+            kind="meeting_summary",
+            text=text,
+            backend=backend,
+            recipients=list(recipients),
+            subject=subject,
+            html_body=html_body,
+        ),
+        filename=SUMMARY_EMAIL_OUTBOX_FILENAME,
+    )
+
+
 __all__ = [
     "DEFAULT_LEFT_MEETING_TEXT",
     "LEFT_MEETING_OUTBOX_FILENAME",
     "TRANSCRIPT_OUTBOX_FILENAME",
     "SUMMARY_OUTBOX_FILENAME",
+    "SUMMARY_EMAIL_OUTBOX_FILENAME",
     "OUTBOX_DIR",
     "OutboxMessage",
     "queue_left_meeting_notification",
     "queue_transcript_notification",
     "queue_summary_notification",
+    "queue_summary_email_notification",
     "write_outbox_message",
 ]
