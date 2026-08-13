@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 from recall_meeting_assistant.email_delivery import (
+    GMAIL_SCOPES,
     iter_pending,
     make_gmail_sender,
     run,
@@ -65,6 +66,10 @@ class FakeGmail:
 
     def users(self):
         return self.users_resource
+
+
+def test_gmail_uses_send_only_scope():
+    assert GMAIL_SCOPES == ["https://www.googleapis.com/auth/gmail.send"]
 
 
 def test_event_selection_intersects_exact_allowlist_and_deduplicates():
