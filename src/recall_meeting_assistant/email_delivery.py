@@ -79,6 +79,31 @@ def build_email_message(
     return message
 
 
+def _validate_send_only_token(path: Path) -> None:
+    """Reject tokens whose stored grant is broader than Gmail send-only use."""
+
+    try:
+        info = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError("google_token_invalid") from exc
+    if not isinstance(info, Mapping):
+        raise RuntimeError("google_token_invalid")
+
+    raw_scopes = info.get("scopes")
+    if isinstance(raw_scopes, str):
+        stored_scopes = {scope for scope in raw_scopes.split() if scope}
+    elif isinstance(raw_scopes, (list, tuple, set, frozenset)):
+        stored_scopes = {str(scope).strip() for scope in raw_scopes if str(scope).strip()}
+    else:
+        stored_scopes = set()
+
+    allowed_scopes = set(GMAIL_SCOPES)
+    if stored_scopes - allowed_scopes:
+        raise RuntimeError("gmail_token_broader_scopes_require_reauth")
+    if stored_scopes != allowed_scopes:
+        raise RuntimeError("gmail_token_scopes_require_reauth")
+
+
 def load_gmail_credentials(token_path: str | Path):
     """Load and refresh the existing Gmail OAuth token in memory only."""
 
@@ -88,6 +113,7 @@ def load_gmail_credentials(token_path: str | Path):
     path = Path(token_path)
     if not path.is_file():
         raise RuntimeError(f"missing_google_token:{path}")
+    _validate_send_only_token(path)
     credentials = Credentials.from_authorized_user_file(str(path), scopes=GMAIL_SCOPES)
     if credentials.expired and credentials.refresh_token:
         credentials.refresh(Request())

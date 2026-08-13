@@ -26,6 +26,7 @@ HTTP service or delivery adapter.
 - A Recall.ai account and API key
 - A public HTTPS endpoint for production webhooks
 - Optional: a Telegram bot token and destination chat/topic
+- Optional: Google OAuth token with the Gmail `send` scope for summary email delivery
 - Optional: OpenAI credentials only if you wire the fallback transcriber
 
 ## Installation
@@ -147,6 +148,27 @@ Use `--dry-run` with the Telegram command to list pending messages without sendi
 recall-meeting-deliver-outbox --storage-root ./data/meetings --dry-run
 ```
 
+### Deliver meeting summaries by Gmail
+
+Gmail summary delivery uses a separate OAuth token authorized with only
+`https://www.googleapis.com/auth/gmail.send`. Set its path with
+`GOOGLE_TOKEN_PATH` or pass `--token-path` directly:
+
+```bash
+export GOOGLE_TOKEN_PATH=/path/to/gmail-send-only-token.json
+recall-meeting-deliver-email --storage-root ./data/meetings
+```
+
+The command sends only summary outboxes whose recipients match the exact
+allowlist in `summary_recipients.py`. It rejects an OAuth token with broader or
+missing stored scopes instead of silently reusing it, so a shared full-Workspace
+token must not be used for this delivery adapter. Use `--dry-run` to inspect
+pending summary emails without sending:
+
+```bash
+recall-meeting-deliver-email --storage-root ./data/meetings --dry-run
+```
+
 ## Suggested service layout
 
 The four stages can run as separate supervised processes or scheduled commands:
@@ -181,6 +203,7 @@ internet without TLS and a firewall/reverse proxy.
 | `TELEGRAM_BOT_TOKEN` | Telegram | Bot API token |
 | `MEETING_ASSISTANT_TELEGRAM_CHAT_ID` | Telegram | Default destination chat |
 | `MEETING_ASSISTANT_TELEGRAM_THREAD_ID` | no | Forum topic ID |
+| `GOOGLE_TOKEN_PATH` | Gmail | Separate Gmail send-only OAuth token path |
 | `OPENAI_API_KEY` | no | Optional injected fallback provider |
 | `MEETING_ASSISTANT_FALLBACK_POLICY` | no | `auto`, `always`, or `never` |
 
