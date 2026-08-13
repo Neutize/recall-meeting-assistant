@@ -13,6 +13,7 @@ import pytest
 from recall_meeting_assistant.email_delivery import (
     GMAIL_SCOPES,
     iter_pending,
+    load_gmail_credentials,
     make_gmail_sender,
     run,
 )
@@ -70,6 +71,28 @@ class FakeGmail:
 
 def test_gmail_uses_send_only_scope():
     assert GMAIL_SCOPES == ["https://www.googleapis.com/auth/gmail.send"]
+
+
+def test_load_gmail_credentials_rejects_broader_stored_scopes(tmp_path: Path):
+    token_path = tmp_path / "google_token.json"
+    token_path.write_text(
+        json.dumps(
+            {
+                "token": "access-token",
+                "refresh_token": "refresh-token",
+                "client_id": "client-id",
+                "client_secret": "client-secret",
+                "scopes": [
+                    "https://www.googleapis.com/auth/gmail.send",
+                    "https://www.googleapis.com/auth/gmail.modify",
+                ],
+                "expiry": "2099-01-01T00:00:00Z",
+            }
+        )
+    )
+
+    with pytest.raises(RuntimeError, match="broader_scopes_require_reauth"):
+        load_gmail_credentials(token_path)
 
 
 def test_event_selection_intersects_exact_allowlist_and_deduplicates():
