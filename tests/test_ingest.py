@@ -86,7 +86,7 @@ def _resource_with_transcript(transcript: Any) -> dict[str, Any]:
         "id": "tr_123",
         "recording": {"id": "rec_123"},
         "transcript": transcript,
-        "download_url": "https://recall-public.s3.amazonaws.com/path/video.mp4?X-Amz-Signature=example-signature",
+        "download_url": "https://storage.example.com/path/video.mp4?X-Amz-Signature=example-signature",
     }
 
 
@@ -100,7 +100,7 @@ def test_transcript_done_ingest_stores_raw_normalized_markdown_and_segments(tmp_
                 {"speaker": "Speaker B", "start": 2, "end": 5, "text": "Agree, the Recall transcript pipeline is ready."},
             ]
         ),
-        bot={"id": "bot_123", "meeting_url": "https://meet.google.com/abc-defg-hij"},
+        bot={"id": "bot_123", "meeting_url": "https://meet.google.com/example-meeting"},
     )
 
     result = process_recall_webhook(event, client=client, store=store)
@@ -184,7 +184,7 @@ def test_transcript_done_downloads_signed_recall_transcript_payload(tmp_path: Pa
         transcript_resource={
             "id": "tr_123",
             "recording": {"id": "rec_123"},
-            "data": {"download_url": "https://signed.example/transcript.json?X-Amz-Signature=example-signature"},
+            "data": {"download_url": "https://signed.example.com/transcript.json?X-Amz-Signature=example-signature"},
         }
     )
 
@@ -192,7 +192,7 @@ def test_transcript_done_downloads_signed_recall_transcript_payload(tmp_path: Pa
 
     assert result.status == IngestStatus.COMPLETED
     assert result.meeting_id is not None
-    assert seen == {"url": "https://signed.example/transcript.json?X-Amz-Signature=example-signature", "timeout": 30}
+    assert seen == {"url": "https://signed.example.com/transcript.json?X-Amz-Signature=example-signature", "timeout": 30}
     segments = store.list_transcript_segments(result.meeting_id)
     assert len(segments) == 1
     assert segments[0].speaker_raw == "Speaker A"
@@ -254,7 +254,7 @@ def test_unsupported_webhook_event_noops_without_fetch_or_artifacts(tmp_path: Pa
 
 def test_terminal_bot_status_queues_left_meeting_notification_outbox(tmp_path: Path):
     store = MeetingStore(tmp_path)
-    client = FakeRecallClient(bot={"id": "bot_123", "meeting_url": "https://meet.google.com/abc-defg-hij"})
+    client = FakeRecallClient(bot={"id": "bot_123", "meeting_url": "https://meet.google.com/example-meeting"})
     event = parse_event(
         {
             "event": "bot.call_ended",
@@ -290,7 +290,7 @@ def test_terminal_bot_status_queues_left_meeting_notification_outbox(tmp_path: P
     assert payload["text"] == DEFAULT_LEFT_MEETING_TEXT
     assert payload["chat_id"] == "-1001234567890"
     assert payload["thread_id"] == "42"
-    assert "abc-defg-hij" not in outbox_path.read_text()
+    assert "example-meeting" not in outbox_path.read_text()
 
 
 def test_non_left_bot_status_noops_without_notification(tmp_path: Path):
@@ -315,12 +315,12 @@ def test_non_left_bot_status_noops_without_notification(tmp_path: Path):
 
 
 def test_status_redaction_removes_meeting_urls_and_signed_urls(tmp_path: Path):
-    text = "https://meet.google.com/abc-defg-hij and https://recall-public.s3.amazonaws.com/a.mp4?X-Amz-Signature=example-signature&token=abc"
+    text = "https://meet.google.com/example-meeting and https://storage.example.com/a.mp4?X-Amz-Signature=example-signature&token=abc"
 
     redacted = redact_status_value(text)
 
-    assert "abc-defg-hij" not in redacted
+    assert "example-meeting" not in redacted
     assert "X-Amz-Signature" not in redacted
     assert "token=abc" not in redacted
     assert "https://meet.google.com/***" in redacted
-    assert "https://recall-public.s3.amazonaws.com/***" in redacted
+    assert "https://storage.example.com/***" in redacted

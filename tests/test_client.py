@@ -31,7 +31,7 @@ from recall_meeting_assistant.client import (
 
 # Long, recognizable fake key so any leak is trivially asserted. Not real.
 SECRET_VALUE = "example-api-value"
-MEETING_URL = "https://meet.google.com/abc-defg-hij"
+MEETING_URL = "https://meet.google.com/example-meeting"
 
 
 def _bot_created_body(bot_id: str = "bot_abc123") -> dict:
@@ -42,7 +42,7 @@ def _bot_created_body(bot_id: str = "bot_abc123") -> dict:
             {"code": "ready", "created_at": "2026-06-01T10:00:00Z"},
             {"code": "joining_call", "created_at": "2026-06-01T10:00:05Z"},
         ],
-        "meeting_url": {"meeting_id": "abc-defg-hij", "platform": "google_meet"},
+        "meeting_url": {"meeting_id": "example-meeting", "platform": "google_meet"},
     }
 
 
@@ -203,7 +203,7 @@ def test_create_bot_serializes_non_string_metadata_values():
     payload = build_create_bot_payload(
         MEETING_URL,
         metadata={
-            "summary_recipient_emails": ["redacted@example.invalid", "redacted@example.invalid"],
+            "summary_recipient_emails": ["person.one@example.com", "person.two@example.com"],
             "enabled": True,
             "attempt": 2,
         },
@@ -211,7 +211,7 @@ def test_create_bot_serializes_non_string_metadata_values():
 
     assert payload["metadata"] == {
         "source": "recall-meeting-assistant",
-        "summary_recipient_emails": '["redacted@example.invalid","redacted@example.invalid"]',
+        "summary_recipient_emails": '["person.one@example.com","person.two@example.com"]',
         "enabled": "true",
         "attempt": "2",
     }

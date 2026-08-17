@@ -1,25 +1,14 @@
-"""Exact allowlist and participant-aware recipient selection for summaries."""
+"""Environment-configured participant selection for summary email delivery."""
 
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Iterable, Mapping
 from email.utils import parseaddr
 from typing import Any
 
-SUMMARY_EMAIL_ALLOWLIST = frozenset(
-    {
-        "redacted@example.invalid",
-        "redacted@example.invalid",
-        "redacted@example.invalid",
-        "redacted@example.invalid",
-        "redacted@example.invalid",
-        "redacted@example.invalid",
-        "redacted@example.invalid",
-        "redacted@example.invalid",
-        "redacted@example.invalid",
-    }
-)
+SUMMARY_EMAIL_ALLOWLIST_ENV = "MEETING_ASSISTANT_SUMMARY_EMAIL_ALLOWLIST"
 
 
 def normalize_email(value: Any) -> str:
@@ -27,6 +16,25 @@ def normalize_email(value: Any) -> str:
 
     _, address = parseaddr(str(value or ""))
     return address.strip().lower()
+
+
+def get_summary_email_allowlist(
+    env: Mapping[str, str] | None = None,
+) -> frozenset[str]:
+    """Return the configured exact-address allowlist.
+
+    The environment value is read for every selection so callers and tests can
+    update configuration without reloading the module. Missing, blank, or
+    comma-only values intentionally disable summary email delivery.
+    """
+
+    source = os.environ if env is None else env
+    raw = source.get(SUMMARY_EMAIL_ALLOWLIST_ENV, "")
+    return frozenset(
+        address
+        for item in raw.split(",")
+        if (address := normalize_email(item)) and "@" in address
+    )
 
 
 def _iter_email_values(value: Any) -> Iterable[str]:
@@ -51,13 +59,17 @@ def _iter_email_values(value: Any) -> Iterable[str]:
 
 
 def allowlisted_summary_recipients(values: Any) -> list[str]:
-    """Return unique recipients that match the exact nine-address allowlist."""
+    """Return unique recipients that match the configured exact allowlist."""
+
+    allowlist = get_summary_email_allowlist()
+    if not allowlist:
+        return []
 
     recipients: list[str] = []
     seen: set[str] = set()
     for value in _iter_email_values(values):
         address = normalize_email(value)
-        if address in SUMMARY_EMAIL_ALLOWLIST and address not in seen:
+        if address in allowlist and address not in seen:
             seen.add(address)
             recipients.append(address)
     return recipients
@@ -107,7 +119,8 @@ def summary_recipient_emails_from_bot(
     """Prefer actual Recall participants, then fall back to invite metadata.
 
     The fallback is used for new bots whose Recall response does not expose
-    participant email data. It is still restricted to the exact allowlist.
+    participant email data. It remains restricted to the environment-configured
+    exact-address allowlist.
     """
 
     payload = bot_payload if isinstance(bot_payload, Mapping) else {}
@@ -127,8 +140,9 @@ def summary_recipient_emails_from_bot(
 
 
 __all__ = [
-    "SUMMARY_EMAIL_ALLOWLIST",
+    "SUMMARY_EMAIL_ALLOWLIST_ENV",
     "allowlisted_summary_recipients",
+    "get_summary_email_allowlist",
     "normalize_email",
     "summary_recipient_emails_from_bot",
     "summary_recipients_from_event",

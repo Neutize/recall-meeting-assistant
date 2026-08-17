@@ -215,8 +215,8 @@ def test_models_meeting_session_roundtrip():
 def test_models_redact_meeting_url_strips_meeting_code():
     from recall_meeting_assistant.models import redact_meeting_url
 
-    redacted = redact_meeting_url("https://meet.google.com/abc-defg-hij")
-    assert "abc-defg-hij" not in redacted
+    redacted = redact_meeting_url("https://meet.google.com/example-meeting")
+    assert "example-meeting" not in redacted
     assert "meet.google.com" in redacted
 
 

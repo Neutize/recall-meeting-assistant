@@ -53,8 +53,8 @@ def redact_meeting_url(url: str | None) -> str | None:
     meeting code path and any query/fragment, which are the access-granting
     parts.  Examples:
 
-        https://meet.google.com/abc-defg-hij  →  https://meet.google.com/***
-        meet.google.com/abc-defg-hij          →  meet.google.com/***
+        https://meet.google.com/example-meeting  →  https://meet.google.com/***
+        meet.google.com/example-meeting          →  meet.google.com/***
     """
     if not url:
         return None

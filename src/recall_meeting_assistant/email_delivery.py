@@ -34,11 +34,7 @@ def _default_token_path() -> Path:
     explicit = os.environ.get("GOOGLE_TOKEN_PATH")
     if explicit:
         return Path(explicit).expanduser()
-    candidates = [
-        Path(os.environ.get("MEETING_ASSISTANT_HOME", "data")) / "google_token.json",
-        Path("data/google_token.json"),
-    ]
-    return next((candidate for candidate in candidates if candidate.is_file()), candidates[-1])
+    return get_product_home() / "google_token.json"
 
 
 DEFAULT_TOKEN_PATH = _default_token_path()

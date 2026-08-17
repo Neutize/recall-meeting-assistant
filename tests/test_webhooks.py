@@ -39,7 +39,7 @@ from recall_meeting_assistant.webhooks import (
 )
 
 SECRET = "example-shared-value"
-MEETING_URL = "https://meet.google.com/abc-defg-hij"
+MEETING_URL = "https://meet.google.com/example-meeting"
 
 
 def _body(payload: dict) -> bytes:
@@ -300,7 +300,7 @@ def test_handle_webhook_does_not_log_secret_or_body(caplog):
     logged = caplog.text
     assert SECRET not in logged
     assert MEETING_URL not in logged
-    assert "abc-defg-hij" not in logged
+    assert "example-meeting" not in logged
 
 
 def test_result_repr_does_not_leak_secret_or_body():

@@ -5,6 +5,13 @@
 *.pem
 *.key
 *.token
+google_token*.json
+token.json
+credentials*.json
+client_secret*.json
+*.p12
+*.pfx
+*.jks
 mcp-tokens/
 participants.yaml
 *.sqlite

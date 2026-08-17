@@ -48,7 +48,7 @@ def directory() -> ParticipantDirectory:
 
 
 def test_exact_email_match_wins(directory: ParticipantDirectory):
-    match = directory.match(email="  PERSON.ONE@EXAMPLE.COM ")
+    match = directory.match(email="  PERSON.ONE@example.com ")
     assert match.matched is True
     assert match.canonical_name == "Person One"
     assert match.telegram_username == "person_one"

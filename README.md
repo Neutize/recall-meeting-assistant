@@ -4,8 +4,10 @@ A small, installable meeting assistant built around [Recall.ai](https://www.reca
 It joins a supported meeting, records it through Recall.ai, downloads the completed
 transcript, stores local artifacts, and can deliver the full transcript to Telegram.
 
-The repository is intentionally standalone. It contains no personal account data,
-private chat IDs, API keys, OAuth sessions, or deployment-specific paths.
+The repository is intentionally standalone. Tracked source and fixtures use only
+synthetic identities and contain no private chat IDs, API keys, OAuth sessions,
+or deployment-specific paths. Runtime meeting artifacts and configured recipient
+addresses remain private data and must stay outside Git.
 
 ## What it does
 
@@ -151,19 +153,25 @@ recall-meeting-deliver-outbox --storage-root ./data/meetings --dry-run
 ### Deliver meeting summaries by Gmail
 
 Gmail summary delivery uses a separate OAuth token authorized with only
-`https://www.googleapis.com/auth/gmail.send`. Set its path with
-`GOOGLE_TOKEN_PATH` or pass `--token-path` directly:
+`https://www.googleapis.com/auth/gmail.send`. Summary delivery is disabled until
+`MEETING_ASSISTANT_SUMMARY_EMAIL_ALLOWLIST` contains a comma-separated list of
+exact recipient addresses. An empty value disables delivery. Set the OAuth token
+path with `GOOGLE_TOKEN_PATH` or pass `--token-path` directly:
 
 ```bash
 export GOOGLE_TOKEN_PATH=/path/to/gmail-send-only-token.json
+export MEETING_ASSISTANT_SUMMARY_EMAIL_ALLOWLIST=person.one@example.com,person.two@example.com
 recall-meeting-deliver-email --storage-root ./data/meetings
 ```
 
-The command sends only summary outboxes whose recipients match the exact
-allowlist in `summary_recipients.py`. It rejects an OAuth token with broader or
-missing stored scopes instead of silently reusing it, so a shared full-Workspace
-token must not be used for this delivery adapter. Use `--dry-run` to inspect
-pending summary emails without sending:
+When `GOOGLE_TOKEN_PATH` is unset, the token defaults to `google_token.json`
+under the product home returned by `get_product_home()` (normally
+`MEETING_ASSISTANT_HOME`, the XDG data directory, or the per-user data directory).
+The command sends only summary outboxes whose recipients match the configured
+exact allowlist. It rejects an OAuth token with broader or missing stored scopes
+instead of silently reusing it, so a shared full-Workspace token must not be used
+for this delivery adapter. Use `--dry-run` to inspect pending summary emails
+without sending:
 
 ```bash
 recall-meeting-deliver-email --storage-root ./data/meetings --dry-run
@@ -203,6 +211,7 @@ internet without TLS and a firewall/reverse proxy.
 | `TELEGRAM_BOT_TOKEN` | Telegram | Bot API token |
 | `MEETING_ASSISTANT_TELEGRAM_CHAT_ID` | Telegram | Default destination chat |
 | `MEETING_ASSISTANT_TELEGRAM_THREAD_ID` | no | Forum topic ID |
+| `MEETING_ASSISTANT_SUMMARY_EMAIL_ALLOWLIST` | Gmail | Comma-separated exact recipients; empty disables summary email delivery |
 | `GOOGLE_TOKEN_PATH` | Gmail | Separate Gmail send-only OAuth token path |
 | `OPENAI_API_KEY` | no | Optional injected fallback provider |
 | `MEETING_ASSISTANT_FALLBACK_POLICY` | no | `auto`, `always`, or `never` |
@@ -233,6 +242,8 @@ recall-meeting-deliver-outbox-fake ./data/meetings --fake
 ## Privacy and security
 
 - Keep API keys and webhook secrets in a secret manager or an ignored `.env`.
+- Keep OAuth token files and recipient allowlists out of Git. The provided
+  ignore rules cover common Google credential filenames.
 - Treat raw transcripts, recordings, participant maps, and webhook files as
   private meeting data.
 - Do not put signed Recall URLs in issue reports or logs.
